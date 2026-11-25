@@ -19,3 +19,6 @@ This repository contains no game files. Bring your own legally obtained dump.
 Not affiliated with or endorsed by the game's developer or publisher.
 
 Currently, nothing has been done yet.
+
+## Credits
+Currently me as the fork maintainer and Claude AI.
