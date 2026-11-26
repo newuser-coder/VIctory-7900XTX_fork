@@ -1036,6 +1036,13 @@ pub fn set_host_max_wave(lanes: u32) {
     HOST_MAX_WAVE.store(lanes, std::sync::atomic::Ordering::Relaxed);
 }
 
+static HOST_MIN_WAVE: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
+
+/// The host GPU's `WaveLaneCountMin`: 64 means console wave32 programs cannot run as they are.
+pub fn set_host_min_wave(lanes: u32) {
+    HOST_MIN_WAVE.store(lanes, std::sync::atomic::Ordering::Relaxed);
+}
+
 thread_local! {
     /// See [`take_needs`].
     static NEEDS: std::cell::RefCell<Vec<usize>> = const { std::cell::RefCell::new(Vec::new()) };
@@ -1526,6 +1533,12 @@ impl<'a> Lower<'a> {
             }
             if console_lanes || one_wave && s.lds_dwords > 0 {
                 s.wave_size = Some(wave);
+                if wave == 32 && HOST_MIN_WAVE.load(std::sync::atomic::Ordering::Relaxed) == 64 {
+                    eprintln!(
+                        "WAVE32-ON-WAVE64 group={group} lds={} console_lanes={console_lanes}",
+                        s.lds_dwords > 0
+                    );
+                }
             }
         }
         // The title's barriers a thread of the group may never reach, which
